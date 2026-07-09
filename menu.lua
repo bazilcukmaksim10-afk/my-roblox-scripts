@@ -1,4 +1,4 @@
--- Создание интерфейса Kill Hub для MM2
+-- Создание интерфейса Kill Hub для MM2 (Увеличенная версия)
 local ScreenGui = Instance.new("ScreenGui")
 local Frame = Instance.new("Frame")
 local Title = Instance.new("TextLabel")
@@ -17,63 +17,66 @@ local HideBtn = Instance.new("TextButton")
 
 ScreenGui.Parent = game:GetService("CoreGui")
 
--- Главное окно
+-- Главное окно (Размер изменен на 0.7 от ширины и 0.8 от высоты экрана)
 Frame.Name = "KillHubMM2"
 Frame.Parent = ScreenGui
-Frame.BackgroundColor3 = Color3.fromRGB(25, 25, 30)
-Frame.BorderSizePixel = 2
+Frame.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
+Frame.BorderSizePixel = 3
 Frame.BorderColor3 = Color3.fromRGB(255, 0, 0) -- Красная обводка хаба
-Frame.Position = UDim2.new(0.1, 0, 0.1, 0)
-Frame.Size = UDim2.new(0, 200, 0, 370)
+Frame.Position = UDim2.new(0.15, 0, 0.1, 0) -- По центру экрана
+Frame.Size = UDim2.new(0.7, 0, 0.8, 0) -- Почти на весь экран
 Frame.Active = true
 Frame.Draggable = true
 
--- Заголовок
+-- Заголовок (увеличенный шрифт)
 Title.Parent = Frame
-Title.Size = UDim2.new(1, 0, 0, 35)
+Title.Size = UDim2.new(1, 0, 0, 60)
 Title.BackgroundTransparency = 1
 Title.Text = "Kill Hub | MM2"
 Title.TextColor3 = Color3.fromRGB(255, 50, 50)
-Title.TextSize = 18
+Title.TextSize = 28
 Title.Font = Enum.Font.SourceSansBold
 
--- Подсказка о скрытии
+-- Подсказка о скрытии (увеличенный шрифт)
 ToggleHint.Parent = Frame
-ToggleHint.Size = UDim2.new(1, 0, 0, 15)
-ToggleHint.Position = UDim2.new(0, 0, 0, 30)
+ToggleHint.Size = UDim2.new(1, 0, 0, 20)
+ToggleHint.Position = UDim2.new(0, 0, 0, 50)
 ToggleHint.BackgroundTransparency = 1
-ToggleHint.Text = "[ Нажми 'K' чтобы скрыть ]"
+ToggleHint.Text = "[ Нажми 'K' чтобы скрыть / показать ]"
 ToggleHint.TextColor3 = Color3.fromRGB(150, 150, 150)
-ToggleHint.TextSize = 11
+ToggleHint.TextSize = 16
 ToggleHint.Font = Enum.Font.SourceSansItalic
 
--- Функция настройки кнопок
+-- Функция настройки больших кнопок
 local function setupButton(btn, text, posY)
     btn.Parent = Frame
+    -- Кнопки теперь занимают 90% ширины огромного окна
     btn.Position = UDim2.new(0.05, 0, 0, posY)
-    btn.Size = UDim2.new(0.9, 0, 0, 35)
-    btn.BackgroundColor3 = Color3.fromRGB(45, 45, 50)
+    btn.Size = UDim2.new(0.9, 0, 0, 50) -- Кнопки стали выше (50 пикселей)
+    btn.BackgroundColor3 = Color3.fromRGB(40, 40, 45)
     btn.Text = text
     btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-    btn.TextSize = 14
+    btn.TextSize = 20 -- Текст на кнопках стал крупнее и читаемее
     btn.Font = Enum.Font.SourceSansBold
 end
 
--- Размещение кнопок
-setupButton(FlyBtn, "Fly: OFF", 55)
-setupButton(NoclipBtn, "Noclip: OFF", 100)
-setupButton(EspBtn, "MM2 ESP: OFF", 145)
-setupButton(CoinBtn, "Auto Farm Coins: OFF", 190)
-setupButton(TeleportSheriffBtn, "TP to Gun / Sheriff", 235)
-setupButton(TeleportLobbyBtn, "TP to Lobby", 280)
+-- Размещение кнопок с учетом увеличенных размеров
+setupButton(FlyBtn, "Fly: OFF", 90)
+setupButton(NoclipBtn, "Noclip: OFF", 155)
+setupButton(EspBtn, "MM2 ESP: OFF", 220)
+setupButton(CoinBtn, "Auto Farm Coins: OFF", 285)
+setupButton(TeleportSheriffBtn, "TP to Gun / Sheriff", 350)
+setupButton(TeleportLobbyBtn, "TP to Lobby", 415)
 
--- Маленькая кнопка "Скрыть" на экране
+-- Кнопка "Show/Hide" на экране (тоже сделана чуть заметнее)
 HideBtn.Parent = ScreenGui
-HideBtn.Position = UDim2.new(0.9, 0, 0.05, 0)
-HideBtn.Size = UDim2.new(0, 80, 0, 30)
+HideBtn.Position = UDim2.new(0.85, 0, 0.02, 0)
+HideBtn.Size = UDim2.new(0, 100, 0, 40)
 HideBtn.BackgroundColor3 = Color3.fromRGB(25, 25, 30)
 HideBtn.Text = "Show/Hide"
 HideBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+HideBtn.TextSize = 16
+HideBtn.Font = Enum.Font.SourceSansBold
 HideBtn.BorderColor3 = Color3.fromRGB(255, 0, 0)
 
 -- ==================== СИСТЕМА СКРЫТИЯ МЕНЮ ====================
@@ -148,7 +151,7 @@ FlyBtn.MouseButton1Click:Connect(function()
             bg:Destroy() bv:Destroy() c1:Disconnect() c2:Disconnect()
         end)
     else
-        FlyBtn.BackgroundColor3 = Color3.fromRGB(45, 45, 50)
+        FlyBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 45)
         FlyBtn.Text = "Fly: OFF"
     end
 end)
@@ -157,7 +160,7 @@ end)
 local noclip = false
 NoclipBtn.MouseButton1Click:Connect(function()
     noclip = not noclip
-    NoclipBtn.BackgroundColor3 = noclip and Color3.fromRGB(0, 150, 0) or Color3.fromRGB(45, 45, 50)
+    NoclipBtn.BackgroundColor3 = noclip and Color3.fromRGB(0, 150, 0) or Color3.fromRGB(40, 40, 45)
     NoclipBtn.Text = noclip and "Noclip: ON" or "Noclip: OFF"
 end)
 runService.Stepped:Connect(function()
@@ -168,7 +171,7 @@ runService.Stepped:Connect(function()
     end
 end)
 
--- 3. Умный MM2 ESP (Подсветка ролей: Убийца - Красный, Шериф - Синий, Невинный - Зеленый)
+-- 3. Умный MM2 ESP
 local espEnabled = false
 local espHighlights = {}
 local function updateESP()
@@ -179,13 +182,12 @@ local function updateESP()
                 espHighlights[p] = hl
                 hl.OutlineColor = Color3.fromRGB(255, 255, 255)
                 
-                -- Проверка роли по вещам в инвентаре MM2
                 if p.Backpack:FindFirstChild("Knife") or (p.Character and p.Character:FindFirstChild("Knife")) then
-                    hl.FillColor = Color3.fromRGB(255, 0, 0) -- Мардер
+                    hl.FillColor = Color3.fromRGB(255, 0, 0)
                 elseif p.Backpack:FindFirstChild("Gun") or (p.Character and p.Character:FindFirstChild("Gun")) then
-                    hl.FillColor = Color3.fromRGB(0, 0, 255) -- Шериф
+                    hl.FillColor = Color3.fromRGB(0, 0, 255)
                 else
-                    hl.FillColor = Color3.fromRGB(0, 255, 0) -- Мирный
+                    hl.FillColor = Color3.fromRGB(0, 255, 0)
                 end
             else
                 if espHighlights[p] then espHighlights[p]:Destroy() espHighlights[p] = nil end
@@ -196,7 +198,7 @@ end
 
 EspBtn.MouseButton1Click:Connect(function()
     espEnabled = not espEnabled
-    EspBtn.BackgroundColor3 = espEnabled and Color3.fromRGB(0, 150, 0) or Color3.fromRGB(45, 45, 50)
+    EspBtn.BackgroundColor3 = espEnabled and Color3.fromRGB(0, 150, 0) or Color3.fromRGB(40, 40, 45)
     EspBtn.Text = espEnabled and "MM2 ESP: ON" or "MM2 ESP: OFF"
     if not espEnabled then
         for _, h in pairs(espHighlights) do if h then h:Destroy() end end
@@ -210,11 +212,11 @@ task.spawn(function()
     end
 end)
 
--- 4. Автосбор монет (Auto Farm Coins)
+-- 4. Автосбор монет
 local autoCoin = false
 CoinBtn.MouseButton1Click:Connect(function()
     autoCoin = not autoCoin
-    CoinBtn.BackgroundColor3 = autoCoin and Color3.fromRGB(0, 150, 0) or Color3.fromRGB(45, 45, 50)
+    CoinBtn.BackgroundColor3 = autoCoin and Color3.fromRGB(0, 150, 0) or Color3.fromRGB(40, 40, 45)
     CoinBtn.Text = autoCoin and "Auto Farm Coins: ON" or "Auto Farm Coins: OFF"
 end)
 task.spawn(function()
@@ -237,19 +239,17 @@ task.spawn(function()
     end
 end)
 
--- 5. Телепорт к пистолету (если Шерифа убили) или к самому Шерифу
+-- 5. Телепорт к пистолету / Шерифу
 TeleportSheriffBtn.MouseButton1Click:Connect(function()
     local hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
     if not hrp then return end
     
-    -- Ищем пистолет на полу
     local droppedGun = workspace:FindFirstChild("GunDrop")
     if droppedGun and droppedGun:IsA("BasePart") then
         hrp.CFrame = droppedGun.CFrame + Vector3.new(0, 2, 0)
         return
     end
     
-    -- Если пистолета на полу нет, ищем живого шерифа
     for _, p in pairs(game.Players:GetPlayers()) do
         if p.Backpack:FindFirstChild("Gun") or (p.Character and p.Character:FindFirstChild("Gun")) then
             if p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
