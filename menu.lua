@@ -1,4 +1,4 @@
--- Создание интерфейса Kill Hub для MM2 (Увеличенная версия)
+-- Создание интерфейса Kill Hub для MM2 (Увеличенная версия с анимацией)
 local ScreenGui = Instance.new("ScreenGui")
 local Frame = Instance.new("Frame")
 local Title = Instance.new("TextLabel")
@@ -12,23 +12,24 @@ local CoinBtn = Instance.new("TextButton")
 local TeleportSheriffBtn = Instance.new("TextButton")
 local TeleportLobbyBtn = Instance.new("TextButton")
 
--- Кнопка для скрытия (для мобильных/удобства)
+-- Кнопка для скрытия
 local HideBtn = Instance.new("TextButton")
 
 ScreenGui.Parent = game:GetService("CoreGui")
 
--- Главное окно (Размер изменен на 0.7 от ширины и 0.8 от высоты экрана)
+-- Настройка главного окна (изначально прозрачное и спрятано внизу для анимации)
 Frame.Name = "KillHubMM2"
 Frame.Parent = ScreenGui
 Frame.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
 Frame.BorderSizePixel = 3
-Frame.BorderColor3 = Color3.fromRGB(255, 0, 0) -- Красная обводка хаба
-Frame.Position = UDim2.new(0.15, 0, 0.1, 0) -- По центру экрана
-Frame.Size = UDim2.new(0.7, 0, 0.8, 0) -- Почти на весь экран
+Frame.BorderColor3 = Color3.fromRGB(255, 0, 0)
+Frame.BackgroundTransparency = 1 -- Старт с полной прозрачности
+Frame.Position = UDim2.new(0.15, 0, 1, 0) -- Старт в самом низу экрана
+Frame.Size = UDim2.new(0.7, 0, 0.8, 0)
 Frame.Active = true
 Frame.Draggable = true
 
--- Заголовок (увеличенный шрифт)
+-- Заголовок
 Title.Parent = Frame
 Title.Size = UDim2.new(1, 0, 0, 60)
 Title.BackgroundTransparency = 1
@@ -36,8 +37,9 @@ Title.Text = "Kill Hub | MM2"
 Title.TextColor3 = Color3.fromRGB(255, 50, 50)
 Title.TextSize = 28
 Title.Font = Enum.Font.SourceSansBold
+Title.TextTransparency = 1
 
--- Подсказка о скрытии (увеличенный шрифт)
+-- Подсказка о скрытии
 ToggleHint.Parent = Frame
 ToggleHint.Size = UDim2.new(1, 0, 0, 20)
 ToggleHint.Position = UDim2.new(0, 0, 0, 50)
@@ -46,21 +48,22 @@ ToggleHint.Text = "[ Нажми 'K' чтобы скрыть / показать ]
 ToggleHint.TextColor3 = Color3.fromRGB(150, 150, 150)
 ToggleHint.TextSize = 16
 ToggleHint.Font = Enum.Font.SourceSansItalic
+ToggleHint.TextTransparency = 1
 
--- Функция настройки больших кнопок
+-- Функция настройки кнопок (изначально текст скрыт)
 local function setupButton(btn, text, posY)
     btn.Parent = Frame
-    -- Кнопки теперь занимают 90% ширины огромного окна
     btn.Position = UDim2.new(0.05, 0, 0, posY)
-    btn.Size = UDim2.new(0.9, 0, 0, 50) -- Кнопки стали выше (50 пикселей)
+    btn.Size = UDim2.new(0.9, 0, 0, 50)
     btn.BackgroundColor3 = Color3.fromRGB(40, 40, 45)
+    btn.BackgroundTransparency = 1
     btn.Text = text
     btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-    btn.TextSize = 20 -- Текст на кнопках стал крупнее и читаемее
+    btn.TextSize = 20
     btn.Font = Enum.Font.SourceSansBold
+    btn.TextTransparency = 1
 end
 
--- Размещение кнопок с учетом увеличенных размеров
 setupButton(FlyBtn, "Fly: OFF", 90)
 setupButton(NoclipBtn, "Noclip: OFF", 155)
 setupButton(EspBtn, "MM2 ESP: OFF", 220)
@@ -68,9 +71,9 @@ setupButton(CoinBtn, "Auto Farm Coins: OFF", 285)
 setupButton(TeleportSheriffBtn, "TP to Gun / Sheriff", 350)
 setupButton(TeleportLobbyBtn, "TP to Lobby", 415)
 
--- Кнопка "Show/Hide" на экране (тоже сделана чуть заметнее)
+-- Кнопка "Show/Hide" на экране
 HideBtn.Parent = ScreenGui
-HideBtn.Position = UDim2.new(0.85, 0, 0.02, 0)
+HideBtn.Position = UDim2.new(0.85, 0, -0.1, 0) -- Спрятана вверху для анимации
 HideBtn.Size = UDim2.new(0, 100, 0, 40)
 HideBtn.BackgroundColor3 = Color3.fromRGB(25, 25, 30)
 HideBtn.Text = "Show/Hide"
@@ -79,17 +82,45 @@ HideBtn.TextSize = 16
 HideBtn.Font = Enum.Font.SourceSansBold
 HideBtn.BorderColor3 = Color3.fromRGB(255, 0, 0)
 
+-- ==================== АНИМАЦИЯ ПОЯВЛЕНИЯ (TWEEN) ====================
+local TweenService = game:GetService("TweenService")
+local animInfo = TweenInfo.new(0.8, Enum.EasingStyle.Quart, Enum.EasingDirection.Out)
+
+-- Плавное проявление самого окна и его выезд на центр
+TweenService:Create(Frame, animInfo, {Position = UDim2.new(0.15, 0, 0.1, 0), BackgroundTransparency = 0}):Play()
+TweenService:Create(HideBtn, animInfo, {Position = UDim2.new(0.85, 0, 0.02, 0)}):Play()
+
+-- Плавное проявление текстов и кнопок
+task.spawn(function()
+    task.wait(0.2)
+    TweenService:Create(Title, animInfo, {TextTransparency = 0}):Play()
+    TweenService:Create(ToggleHint, animInfo, {TextTransparency = 0}):Play()
+    
+    local buttons = {FlyBtn, NoclipBtn, EspBtn, CoinBtn, TeleportSheriffBtn, TeleportLobbyBtn}
+    for _, btn in pairs(buttons) do
+        TweenService:Create(btn, animInfo, {BackgroundTransparency = 0, TextTransparency = 0}):Play()
+        task.wait(0.05) -- Небольшая задержка "лесенкой" для красоты
+    end
+end)
+
 -- ==================== СИСТЕМА СКРЫТИЯ МЕНЮ ====================
 local menuVisible = true
 local function toggleMenu()
     menuVisible = not menuVisible
-    Frame.Visible = menuVisible
+    if menuVisible then
+        Frame.Visible = true
+        TweenService:Create(Frame, TweenInfo.new(0.4, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {Position = UDim2.new(0.15, 0, 0.1, 0)}):Play()
+    else
+        local hideTween = TweenService:Create(Frame, TweenInfo.new(0.4, Enum.EasingStyle.Quart, Enum.EasingDirection.In), {Position = UDim2.new(0.15, 0, 1.1, 0)})
+        hideTween:Play()
+        hideTween.Completed:Connect(function()
+            if not menuVisible then Frame.Visible = false end
+        end)
+    end
 end
 
 game:GetService("UserInputService").InputBegan:Connect(function(input, gpe)
-    if not gpe and input.KeyCode == Enum.KeyCode.K then
-        toggleMenu()
-    end
+    if not gpe and input.KeyCode == Enum.KeyCode.K then toggleMenu() end
 end)
 HideBtn.MouseButton1Click:Connect(toggleMenu)
 
