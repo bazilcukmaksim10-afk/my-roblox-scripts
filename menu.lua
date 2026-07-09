@@ -1,79 +1,193 @@
--- Создание интерфейса Kill Hub для MM2 (Увеличенная версия с анимацией)
+-- Kill Hub MM2 с вкладками и новыми функциями
 local ScreenGui = Instance.new("ScreenGui")
 local Frame = Instance.new("Frame")
 local Title = Instance.new("TextLabel")
 local ToggleHint = Instance.new("TextLabel")
 
--- Кнопки функций
+-- Панели интерфейса
+local LeftPanel = Instance.new("Frame")  -- Панель для вкладок слева
+local MainPanel = Instance.new("Frame")  -- Правая панель для контента
+
+-- Кнопки переключения вкладок
+local TabMainBtn = Instance.new("TextButton")
+local TabMM2Btn = Instance.new("TextButton")
+local TabSettingsBtn = Instance.new("TextButton")
+
+-- Контейнеры для содержимого вкладок
+local TabMainContent = Instance.new("Frame")
+local TabMM2Content = Instance.new("Frame")
+local TabSettingsContent = Instance.new("Frame")
+
+-- Элементы вкладки "Основное"
 local FlyBtn = Instance.new("TextButton")
 local NoclipBtn = Instance.new("TextButton")
 local EspBtn = Instance.new("TextButton")
+
+-- Элементы вкладки "MM2 функции"
 local CoinBtn = Instance.new("TextButton")
 local TeleportSheriffBtn = Instance.new("TextButton")
 local TeleportLobbyBtn = Instance.new("TextButton")
+local FlingMurderBtn = Instance.new("TextButton")
+local FlingSheriffBtn = Instance.new("TextButton")
 
--- Кнопка для скрытия
+-- Элементы вкладки "Настройки"
+local SpeedTitle = Instance.new("TextLabel")
+local SpeedPlusBtn = Instance.new("TextButton")
+local SpeedMinusBtn = Instance.new("TextButton")
+local SpeedValueLabel = Instance.new("TextLabel")
+
+-- Кнопка скрыть/показать
 local HideBtn = Instance.new("TextButton")
 
 ScreenGui.Parent = game:GetService("CoreGui")
 
--- Настройка главного окна (изначально прозрачное и спрятано внизу для анимации)
-Frame.Name = "KillHubMM2"
+-- Главное окно (на весь экран)
+Frame.Name = "KillHubTabs"
 Frame.Parent = ScreenGui
 Frame.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
 Frame.BorderSizePixel = 3
 Frame.BorderColor3 = Color3.fromRGB(255, 0, 0)
-Frame.BackgroundTransparency = 1 -- Старт с полной прозрачности
-Frame.Position = UDim2.new(0.15, 0, 1, 0) -- Старт в самом низу экрана
+Frame.BackgroundTransparency = 1
+Frame.Position = UDim2.new(0.15, 0, 1, 0) -- Для анимации появления снизу
 Frame.Size = UDim2.new(0.7, 0, 0.8, 0)
 Frame.Active = true
 Frame.Draggable = true
 
 -- Заголовок
 Title.Parent = Frame
-Title.Size = UDim2.new(1, 0, 0, 60)
+Title.Size = UDim2.new(1, 0, 0, 50)
 Title.BackgroundTransparency = 1
-Title.Text = "Kill Hub | MM2"
+Title.Text = "Kill Hub | MM2 Edition"
 Title.TextColor3 = Color3.fromRGB(255, 50, 50)
-Title.TextSize = 28
+Title.TextSize = 24
 Title.Font = Enum.Font.SourceSansBold
 Title.TextTransparency = 1
 
--- Подсказка о скрытии
+-- Подсказка
 ToggleHint.Parent = Frame
 ToggleHint.Size = UDim2.new(1, 0, 0, 20)
-ToggleHint.Position = UDim2.new(0, 0, 0, 50)
+ToggleHint.Position = UDim2.new(0, 0, 0, 42)
 ToggleHint.BackgroundTransparency = 1
-ToggleHint.Text = "[ Нажми 'K' чтобы скрыть / показать ]"
-ToggleHint.TextColor3 = Color3.fromRGB(150, 150, 150)
-ToggleHint.TextSize = 16
+ToggleHint.Text = "[ Нажми 'K' для Скрытия ]"
+ToggleHint.TextColor3 = Color3.fromRGB(130, 130, 130)
+ToggleHint.TextSize = 14
 ToggleHint.Font = Enum.Font.SourceSansItalic
 ToggleHint.TextTransparency = 1
 
--- Функция настройки кнопок (изначально текст скрыт)
-local function setupButton(btn, text, posY)
-    btn.Parent = Frame
-    btn.Position = UDim2.new(0.05, 0, 0, posY)
-    btn.Size = UDim2.new(0.9, 0, 0, 50)
-    btn.BackgroundColor3 = Color3.fromRGB(40, 40, 45)
-    btn.BackgroundTransparency = 1
+-- ЛЕВАЯ ПАНЕЛЬ (ВКЛАДКИ)
+LeftPanel.Parent = Frame
+LeftPanel.BackgroundColor3 = Color3.fromRGB(15, 15, 18)
+LeftPanel.BorderSizePixel = 0
+LeftPanel.Position = UDim2.new(0, 0, 0, 70)
+LeftPanel.Size = UDim2.new(0.25, 0, 1, -70)
+
+-- ПРАВАЯ ПАНЕЛЬ (КОНТЕНТ)
+MainPanel.Parent = Frame
+MainPanel.BackgroundColor3 = Color3.fromRGB(25, 25, 30)
+MainPanel.BorderSizePixel = 0
+MainPanel.Position = UDim2.new(0.25, 0, 0, 70)
+MainPanel.Size = UDim2.new(0.75, 0, 1, -70)
+
+-- Функция для создания кнопок вкладок слева
+local function createTabButton(btn, text, order)
+    btn.Parent = LeftPanel
+    btn.Size = UDim2.new(1, 0, 0, 50)
+    btn.Position = UDim2.new(0, 0, 0, (order - 1) * 55)
+    btn.BackgroundColor3 = Color3.fromRGB(30, 30, 35)
+    btn.BorderSizePixel = 0
     btn.Text = text
     btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-    btn.TextSize = 20
+    btn.TextSize = 16
     btn.Font = Enum.Font.SourceSansBold
+    btn.BackgroundTransparency = 1
     btn.TextTransparency = 1
 end
 
-setupButton(FlyBtn, "Fly: OFF", 90)
-setupButton(NoclipBtn, "Noclip: OFF", 155)
-setupButton(EspBtn, "MM2 ESP: OFF", 220)
-setupButton(CoinBtn, "Auto Farm Coins: OFF", 285)
-setupButton(TeleportSheriffBtn, "TP to Gun / Sheriff", 350)
-setupButton(TeleportLobbyBtn, "TP to Lobby", 415)
+createTabButton(TabMainBtn, "Основное", 1)
+createTabButton(TabMM2Btn, "MM2 Функции", 2)
+createTabButton(TabSettingsBtn, "Настройки", 3)
 
--- Кнопка "Show/Hide" на экране
+-- Функция настройки контейнеров контента
+local function setupContentFrame(f)
+    f.Parent = MainPanel
+    f.Size = UDim2.new(1, 0, 1, 0)
+    f.BackgroundTransparency = 1
+    f.Visible = false
+end
+
+setupContentFrame(TabMainContent)
+setupContentFrame(TabMM2Content)
+setupContentFrame(TabSettingsContent)
+
+-- Функция настройки обычных кнопок хаба
+local function setupGridButton(btn, text, posX, posY, parent)
+    btn.Parent = parent
+    btn.Size = UDim2.new(0.43, 0, 0, 50)
+    btn.Position = UDim2.new(posX, 0, 0, posY)
+    btn.BackgroundColor3 = Color3.fromRGB(40, 40, 45)
+    btn.Text = text
+    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    btn.TextSize = 18
+    btn.Font = Enum.Font.SourceSansBold
+    btn.BackgroundTransparency = 1
+    btn.TextTransparency = 1
+end
+
+-- Наполнение вкладки "Основное" (Сетка в 2 колонки: posX может быть 0.05 или 0.52)
+setupGridButton(FlyBtn, "Fly: OFF", 0.05, 20, TabMainContent)
+setupGridButton(NoclipBtn, "Noclip: OFF", 0.52, 20, TabMainContent)
+setupGridButton(EspBtn, "MM2 ESP: OFF", 0.05, 85, TabMainContent)
+
+-- Наполнение вкладки "MM2 функции"
+setupGridButton(CoinBtn, "Coins Farm: OFF", 0.05, 20, TabMM2Content)
+setupGridButton(TeleportSheriffBtn, "TP to Gun/Sheriff", 0.52, 20, TabMM2Content)
+setupGridButton(TeleportLobbyBtn, "TP to Lobby", 0.05, 85, TabMM2Content)
+setupGridButton(FlingMurderBtn, "Fling Murderer", 0.05, 160, TabMM2Content)
+setupGridButton(FlingSheriffBtn, "Fling Sheriff", 0.52, 160, TabMM2Content)
+FlingMurderBtn.BackgroundColor3 = Color3.fromRGB(100, 30, 30)
+FlingSheriffBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 100)
+
+-- Наполнение вкладки "Настройки" (Управление скоростью бега)
+SpeedTitle.Parent = TabSettingsContent
+SpeedTitle.Size = UDim2.new(0.9, 0, 0, 30)
+SpeedTitle.Position = UDim2.new(0.05, 0, 0, 20)
+SpeedTitle.BackgroundTransparency = 1
+SpeedTitle.Text = "Настройка WalkSpeed (Скорость бега)"
+SpeedTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
+SpeedTitle.TextSize = 18
+SpeedTitle.Font = Enum.Font.SourceSansBold
+SpeedTitle.TextXAlignment = Enum.TextXAlignment.Left
+
+SpeedMinusBtn.Parent = TabSettingsContent
+SpeedMinusBtn.Size = UDim2.new(0, 50, 0, 50)
+SpeedMinusBtn.Position = UDim2.new(0.05, 0, 0, 60)
+SpeedMinusBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 55)
+SpeedMinusBtn.Text = "-"
+SpeedMinusBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+SpeedMinusBtn.TextSize = 24
+SpeedMinusBtn.Font = Enum.Font.SourceSansBold
+
+SpeedValueLabel.Parent = TabSettingsContent
+SpeedValueLabel.Size = UDim2.new(0, 100, 0, 50)
+SpeedValueLabel.Position = UDim2.new(0.2, 0, 0, 60)
+SpeedValueLabel.BackgroundTransparency = 1
+SpeedValueLabel.Text = "16"
+SpeedValueLabel.TextColor3 = Color3.fromRGB(255, 50, 50)
+SpeedValueLabel.TextSize = 22
+SpeedValueLabel.Font = Enum.Font.SourceSansBold
+
+SpeedPlusBtn.Parent = TabSettingsContent
+SpeedPlusBtn.Size = UDim2.new(0, 50, 0, 50)
+SpeedPlusBtn.Position = UDim2.new(0.45, 0, 0, 60)
+SpeedPlusBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 55)
+SpeedPlusBtn.Text = "+"
+SpeedPlusBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+SpeedPlusBtn.TextSize = 24
+SpeedPlusBtn.Font = Enum.Font.SourceSansBold
+
+-- Кнопка Скрыть/Показать на экране
 HideBtn.Parent = ScreenGui
-HideBtn.Position = UDim2.new(0.85, 0, -0.1, 0) -- Спрятана вверху для анимации
+HideBtn.Position = UDim2.new(0.85, 0, -0.1, 0)
 HideBtn.Size = UDim2.new(0, 100, 0, 40)
 HideBtn.BackgroundColor3 = Color3.fromRGB(25, 25, 30)
 HideBtn.Text = "Show/Hide"
@@ -82,24 +196,46 @@ HideBtn.TextSize = 16
 HideBtn.Font = Enum.Font.SourceSansBold
 HideBtn.BorderColor3 = Color3.fromRGB(255, 0, 0)
 
--- ==================== АНИМАЦИЯ ПОЯВЛЕНИЯ (TWEEN) ====================
+-- ==================== ЛОГИКА ВКЛАДОК ====================
+local function switchTab(activeFrame, activeBtn)
+    TabMainContent.Visible = false
+    TabMM2Content.Visible = false
+    TabSettingsContent.Visible = false
+    
+    TabMainBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 35)
+    TabMM2Btn.BackgroundColor3 = Color3.fromRGB(30, 30, 35)
+    TabSettingsBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 35)
+    
+    activeFrame.Visible = true
+    activeBtn.BackgroundColor3 = Color3.fromRGB(255, 0, 0) -- Активная вкладка подсвечена красным
+end
+
+TabMainBtn.MouseButton1Click:Connect(function() switchTab(TabMainContent, TabMainBtn) end)
+TabMM2Btn.MouseButton1Click:Connect(function() switchTab(TabMM2Content, TabMM2Btn) end)
+TabSettingsBtn.MouseButton1Click:Connect(function() switchTab(TabSettingsContent, TabSettingsBtn) end)
+
+switchTab(TabMainContent, TabMainBtn) -- Открыть первую вкладку по умолчанию
+
+-- ==================== АНИМАЦИЯ ПОЯВЛЕНИЯ ====================
 local TweenService = game:GetService("TweenService")
 local animInfo = TweenInfo.new(0.8, Enum.EasingStyle.Quart, Enum.EasingDirection.Out)
 
--- Плавное проявление самого окна и его выезд на центр
 TweenService:Create(Frame, animInfo, {Position = UDim2.new(0.15, 0, 0.1, 0), BackgroundTransparency = 0}):Play()
 TweenService:Create(HideBtn, animInfo, {Position = UDim2.new(0.85, 0, 0.02, 0)}):Play()
 
--- Плавное проявление текстов и кнопок
 task.spawn(function()
     task.wait(0.2)
     TweenService:Create(Title, animInfo, {TextTransparency = 0}):Play()
     TweenService:Create(ToggleHint, animInfo, {TextTransparency = 0}):Play()
     
-    local buttons = {FlyBtn, NoclipBtn, EspBtn, CoinBtn, TeleportSheriffBtn, TeleportLobbyBtn}
-    for _, btn in pairs(buttons) do
-        TweenService:Create(btn, animInfo, {BackgroundTransparency = 0, TextTransparency = 0}):Play()
-        task.wait(0.05) -- Небольшая задержка "лесенкой" для красоты
+    local leftElements = {TabMainBtn, TabMM2Btn, TabSettingsBtn}
+    for _, elem in pairs(leftElements) do
+        TweenService:Create(elem, animInfo, {BackgroundTransparency = 0, TextTransparency = 0}):Play()
+    end
+    
+    local gridElements = {FlyBtn, NoclipBtn, EspBtn, CoinBtn, TeleportSheriffBtn, TeleportLobbyBtn, FlingMurderBtn, FlingSheriffBtn}
+    for _, elem in pairs(gridElements) do
+        TweenService:Create(elem, animInfo, {BackgroundTransparency = 0, TextTransparency = 0}):Play()
     end
 end)
 
@@ -127,6 +263,23 @@ HideBtn.MouseButton1Click:Connect(toggleMenu)
 -- ==================== ЛОГИКА ФУНКЦИЙ ====================
 local player = game.Players.LocalPlayer
 local runService = game:GetService("RunService")
+
+-- Функция НАСТРОЙКИ СКОРОСТИ
+local currentSpeed = 16
+local function updateSpeed(value)
+    currentSpeed = math.clamp(currentSpeed + value, 16, 250)
+    SpeedValueLabel.Text = tostring(currentSpeed)
+    if player.Character and player.Character:FindFirstChild("Humanoid") then
+        player.Character.Humanoid.WalkSpeed = currentSpeed
+    end
+end
+SpeedPlusBtn.MouseButton1Click:Connect(function() updateSpeed(10) end)
+SpeedMinusBtn.MouseButton1Click:Connect(function() updateSpeed(-10) end)
+
+player.CharacterAdded:Connect(function(char)
+    local hum = char:WaitForChild("Humanoid")
+    hum.WalkSpeed = currentSpeed
+end)
 
 -- 1. Полет (Fly)
 local flying = false
@@ -202,7 +355,7 @@ runService.Stepped:Connect(function()
     end
 end)
 
--- 3. Умный MM2 ESP
+-- 3. MM2 ESP
 local espEnabled = false
 local espHighlights = {}
 local function updateESP()
@@ -248,7 +401,7 @@ local autoCoin = false
 CoinBtn.MouseButton1Click:Connect(function()
     autoCoin = not autoCoin
     CoinBtn.BackgroundColor3 = autoCoin and Color3.fromRGB(0, 150, 0) or Color3.fromRGB(40, 40, 45)
-    CoinBtn.Text = autoCoin and "Auto Farm Coins: ON" or "Auto Farm Coins: OFF"
+    CoinBtn.Text = autoCoin and "Coins Farm: ON" or "Coins Farm: OFF"
 end)
 task.spawn(function()
     while true do
@@ -291,7 +444,7 @@ TeleportSheriffBtn.MouseButton1Click:Connect(function()
     end
 end)
 
--- 6. Телепорт в безопасное лобби
+-- 6. Телепорт в лобби
 TeleportLobbyBtn.MouseButton1Click:Connect(function()
     local hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
     local lobbyWorkspace = workspace:FindFirstChild("Lobby")
@@ -302,3 +455,24 @@ TeleportLobbyBtn.MouseButton1Click:Connect(function()
         end
     end
 end)
+
+-- ВЫКИДЫВАНИЕ (ФЛИНГ) ЗА КАРТУ
+local function flingTarget(targetRole)
+    local hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+    if not hrp then return end
+    
+    for _, p in pairs(game.Players:GetPlayers()) do
+        if p ~= player and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
+            local isMurder = p.Backpack:FindFirstChild("Knife") or p.Character:FindFirstChild("Knife")
+            local isSheriff = p.Backpack:FindFirstChild("Gun") or p.Character:FindFirstChild("Gun")
+            
+            if (targetRole == "Murderer" and isMurder) or (targetRole == "Sheriff" and isSheriff) then
+                -- Безопасный и мощный импульс: телепортируем цель под карту в бездну
+                p.Character.HumanoidRootPart.CFrame = CFrame.new(0, -500, 0)
+            end
+        end
+    end
+end
+
+FlingMurderBtn.MouseButton1Click:Connect(function() flingTarget("Murderer") end)
+FlingSheriffBtn.MouseButton1Click:Connect(function() flingTarget("Sheriff") end)
