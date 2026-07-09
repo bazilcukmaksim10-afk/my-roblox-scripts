@@ -19,6 +19,7 @@ local TabSettingsContent = Instance.new("Frame")
 local FlyBtn = Instance.new("TextButton")
 local NoclipBtn = Instance.new("TextButton")
 local EspBtn = Instance.new("TextButton")
+local InfJumpBtn = Instance.new("TextButton") -- Новая кнопка
 
 -- Вкладка "Авто-Фарм"
 local AutoCollectBtn = Instance.new("TextButton")
@@ -36,7 +37,7 @@ ScreenGui.Parent = game:GetService("CoreGui")
 
 Frame.Name = "BrainrotHub"
 Frame.Parent = ScreenGui
-Frame.BackgroundColor3 = Color3.fromRGB(25, 20, 30) -- Фиолетовый оттенок под стиль игры
+Frame.BackgroundColor3 = Color3.fromRGB(25, 20, 30)
 Frame.BorderSizePixel = 3
 Frame.BorderColor3 = Color3.fromRGB(180, 50, 255)
 Frame.BackgroundTransparency = 1
@@ -121,6 +122,7 @@ end
 setupGridButton(FlyBtn, "Fly: OFF", 0.05, 20, TabMainContent)
 setupGridButton(NoclipBtn, "Noclip: OFF", 0.52, 20, TabMainContent)
 setupGridButton(EspBtn, "Player ESP: OFF", 0.05, 85, TabMainContent)
+setupGridButton(InfJumpBtn, "Inf Jump: OFF", 0.52, 85, TabMainContent) -- Разместили рядом с ESP
 
 setupGridButton(AutoCollectBtn, "Auto Collect: OFF", 0.05, 20, TabFarmContent)
 setupGridButton(AutoDuelBtn, "Auto Duel: OFF", 0.52, 20, TabFarmContent)
@@ -180,7 +182,7 @@ local function switchTab(activeFrame, activeBtn)
     TabFarmBtn.BackgroundColor3 = Color3.fromRGB(40, 35, 45)
     TabSettingsBtn.BackgroundColor3 = Color3.fromRGB(40, 35, 45)
     activeFrame.Visible = true
-    activeBtn.BackgroundColor3 = Color3.fromRGB(180, 50, 255) -- Подсветка фиолетовым
+    activeBtn.BackgroundColor3 = Color3.fromRGB(180, 50, 255)
 end
 
 TabMainBtn.MouseButton1Click:Connect(function() switchTab(TabMainContent, TabMainBtn) end)
@@ -198,7 +200,7 @@ task.spawn(function()
     TweenService:Create(Title, animInfo, {TextTransparency = 0}):Play()
     TweenService:Create(ToggleHint, animInfo, {TextTransparency = 0}):Play()
     for _, elem in pairs({TabMainBtn, TabFarmBtn, TabSettingsBtn}) do TweenService:Create(elem, animInfo, {BackgroundTransparency = 0, TextTransparency = 0}):Play() end
-    for _, elem in pairs({FlyBtn, NoclipBtn, EspBtn, AutoCollectBtn, AutoDuelBtn}) do TweenService:Create(elem, animInfo, {BackgroundTransparency = 0, TextTransparency = 0}):Play() end
+    for _, elem in pairs({FlyBtn, NoclipBtn, EspBtn, InfJumpBtn, AutoCollectBtn, AutoDuelBtn}) do TweenService:Create(elem, animInfo, {BackgroundTransparency = 0, TextTransparency = 0}):Play() end
 end)
 
 local menuVisible = true
@@ -276,8 +278,23 @@ end
 EspBtn.MouseButton1Click:Connect(function() espEnabled = not espEnabled EspBtn.BackgroundColor3 = espEnabled and Color3.fromRGB(0, 150, 0) or Color3.fromRGB(45, 40, 55) EspBtn.Text = espEnabled and "Player ESP: ON" or "Player ESP: OFF" if not espEnabled then for _, h in pairs(espHighlights) do if h then h:Destroy() end end espHighlights = {} end end)
 task.spawn(function() while true do if espEnabled then updateESP() end task.wait(1) end end)
 
--- 4. АВТО-СБОР БРЭЙНРОТ ПРЕДМЕТОВ
+-- 4. Infinite Jump (Бесконечный прыжок вверх)
+local infJump = false
+InfJumpBtn.MouseButton1Click:Connect(function()
+    infJump = not infJump
+    InfJumpBtn.BackgroundColor3 = infJump and Color3.fromRGB(0, 150, 0) or Color3.fromRGB(45, 40, 55)
+    InfJumpBtn.Text = infJump and "Inf Jump: ON" or "Inf Jump: OFF"
+end)
+
+game:GetService("UserInputService").JumpRequest:Connect(function()
+    if infJump and player.Character and player.Character:FindFirstChildOfClass("Humanoid") then
+        player.Character:FindFirstChildOfClass("Humanoid"):ChangeState("Jumping")
+    end
+end)
+
+-- 5. Auto Collect
 local autoCollect = false
+CoinBtn = AutoCollectBtn -- Перепривязка для обратной совместимости
 AutoCollectBtn.MouseButton1Click:Connect(function()
     autoCollect = not autoCollect
     AutoCollectBtn.BackgroundColor3 = autoCollect and Color3.fromRGB(0, 150, 0) or Color3.fromRGB(45, 40, 55)
@@ -287,11 +304,9 @@ end)
 task.spawn(function()
     while true do
         if autoCollect and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-            -- Скрипт ищет все спавнящиеся предметы на карте
             for _, obj in pairs(workspace:GetDescendants()) do
                 if obj:IsA("TouchTransmitter") and obj.Parent and obj.Parent:IsA("BasePart") then
                     local part = obj.Parent
-                    -- Исключаем зоны спавна и другие ненужные объекты
                     if not part:IsDescendantOf(player.Character) and part.Name ~= "HumanoidRootPart" then
                         player.Character.HumanoidRootPart.CFrame = part.CFrame
                         task.wait(0.1)
@@ -303,7 +318,7 @@ task.spawn(function()
     end
 end)
 
--- 5. АВТО-ДУЭЛИ (Поиск и клик по кнопкам дуэлей)
+-- 6. Auto Duel
 local autoDuel = false
 AutoDuelBtn.MouseButton1Click:Connect(function()
     autoDuel = not autoDuel
@@ -314,13 +329,11 @@ end)
 task.spawn(function()
     while true do
         if autoDuel then
-            -- Нажатие на кнопку вызова/принятия дуэли в интерфейсе игры, если она активна
             local pGui = player:FindFirstChild("PlayerGui")
             if pGui then
                 for _, gui in pairs(pGui:GetDescendants()) do
                     if gui:IsA("TextButton") and (string.find(string.lower(gui.Text), "duel") or string.find(string.lower(gui.Text), "accept")) then
                         if gui.Visible and gui.AbsoluteSize.X > 0 then
-                            -- Симулируем клик по кнопке
                             gui:Activate()
                         end
                     end
