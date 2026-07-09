@@ -18,11 +18,11 @@ Frame.Size = UDim2.new(0, 180, 0, 200)
 Frame.Active = true
 Frame.Draggable = true -- Можно перетаскивать пальцем/мышкой
 
--- Заголовок
+-- Заголовок с названием "Kill Hub"
 Title.Parent = Frame
 Title.Size = UDim2.new(1, 0, 0, 35)
 Title.BackgroundTransparency = 1
-Title.Text = "Xeno Menu"
+Title.Text = "Kill Hub"
 Title.TextColor3 = Color3.fromRGB(255, 255, 255)
 Title.TextSize = 16
 Title.Font = Enum.Font.SourceSansBold
