@@ -6,46 +6,83 @@ local Character = Player.Character or Player.CharacterAdded:Wait()
 local Humanoid = Character:WaitForChild("Humanoid")
 local RootPart = Character:WaitForChild("HumanoidRootPart")
 
-local Noclip = false
-local Speed = 100
+local SpinActive = false
+local Speed = 150 -- Велика швидкість бігу
 
 -- Створення платформи (кубика) під гравцем
 local Platform = Instance.new("Part")
 Platform.Size = Vector3.new(4, 1, 4)
 Platform.Anchored = true
-Platform.Transparency = 1 -- Зроби 0, якщо хочеш бачити кубик під собою
+Platform.Transparency = 1
 Platform.CanCollide = false
 Platform.Parent = workspace
 
-local function UpdateWalkSpeed()
-    if Humanoid then
-        Humanoid.WalkSpeed = Speed
+-- Обертання через BodyAngularVelocity
+local Spin = Instance.new("BodyAngularVelocity")
+Spin.MaxTorque = Vector3.new(0, math.huge, 0)
+Spin.AngularVelocity = Vector3.new(0, 1000000, 0) -- Шалена швидкість обертання
+
+-- Функція перетворення на Квадрат
+local function MakeCube()
+    if Character then
+        for _, part in pairs(Character:GetDescendants()) do
+            if part:IsA("BasePart") and part.Name ~= "HumanoidRootPart" then
+                part.Transparency = 1
+            elseif part:IsA("CharacterMesh") or part:IsA("Shirt") or part:IsA("Pants") or part:IsA("Accessory") then
+                part:Destroy()
+            end
+        end
+        
+        -- Створюємо візуальний куб замість тіла
+        if not RootPart:FindFirstChild("VisualCube") then
+            local Cube = Instance.new("Part")
+            Cube.Name = "VisualCube"
+            Cube.Size = Vector3.new(4, 4, 4)
+            Cube.Color = Color3.fromRGB(150, 150, 150)
+            Cube.CanCollide = false
+            Cube.Parent = RootPart
+            
+            local Weld = Instance.new("Weld")
+            Weld.Part0 = RootPart
+            Weld.Part1 = Cube
+            Weld.C0 = CFrame.new(0, 0, 0)
+            Weld.Parent = Cube
+        end
     end
+end
+
+local function UpdateWalkSpeed()
+    if Humanoid then Humanoid.WalkSpeed = Speed end
 end
 
 Player.CharacterAdded:Connect(function(char)
     Character = char
     Humanoid = char:WaitForChild("Humanoid")
     RootPart = char:WaitForChild("HumanoidRootPart")
+    task.wait(0.5)
+    MakeCube()
     UpdateWalkSpeed()
 end)
 
--- Основний цикл: Ноукліп та керування кубиком під ногами
+-- Головний цикл (Ноукліп, кубик під ногами, обертання)
 game:GetService("RunService").Stepped:Connect(function()
     if Character and Humanoid and RootPart then
-        if Noclip then
-            -- Вимикаємо колізію для персонажа
+        if SpinActive then
+            -- Постійний Ноукліп
             for _, part in pairs(Character:GetDescendants()) do
                 if part:IsA("BasePart") then
                     part.CanCollide = false
                 end
             end
-            -- Телепортуємо кубик під ноги, щоб не падати
+            -- Активуємо платформу під ногами
             Platform.CanCollide = true
             Platform.CFrame = RootPart.CFrame * CFrame.new(0, -3.5, 0)
+            -- Вмикаємо крутилку
+            Spin.Parent = RootPart
         else
             Platform.CanCollide = false
-            Platform.CFrame = CFrame.new(0, 9999, 0) -- Ховаємо кубик далеко
+            Platform.CFrame = CFrame.new(0, 9999, 0)
+            Spin.Parent = nil
         end
     end
 end)
@@ -57,7 +94,7 @@ local success, _ = pcall(function() ScreenGui.Parent = game:GetService("CoreGui"
 if not success then ScreenGui.Parent = Player:FindFirstChildOfClass("PlayerGui") end
 
 local MainFrame = Instance.new("Frame")
-MainFrame.Size = UDim2.new(0, 200, 0, 180)
+MainFrame.Size = UDim2.new(0, 200, 0, 150)
 MainFrame.Position = UDim2.new(0.05, 0, 0.3, 0)
 MainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 MainFrame.BorderSizePixel = 0
@@ -74,64 +111,26 @@ Title.TextSize = 18
 Title.Font = Enum.Font.SourceSansBold
 Title.Parent = MainFrame
 
--- Кнопка Noclip
-local NoclipBtn = Instance.new("TextButton")
-NoclipBtn.Size = UDim2.new(0.9, 0, 0, 40)
-NoclipBtn.Position = UDim2.new(0.05, 0, 0.28, 0)
-NoclipBtn.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-NoclipBtn.Text = "Noclip + Платформа: OFF"
-NoclipBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-NoclipBtn.Font = Enum.Font.SourceSans
-NoclipBtn.TextSize = 14
-NoclipBtn.Parent = MainFrame
+local SpinBtn = Instance.new("TextButton")
+SpinBtn.Size = UDim2.new(0.9, 0, 0, 40)
+SpinBtn.Position = UDim2.new(0.05, 0, 0.35, 0)
+SpinBtn.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+SpinBtn.Text = "Гіпер-Крутилка: OFF"
+SpinBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+SpinBtn.Font = Enum.Font.SourceSans
+SpinBtn.TextSize = 14
+SpinBtn.Parent = MainFrame
 
-NoclipBtn.MouseButton1Click:Connect(function()
-    Noclip = not Noclip
-    if Noclip then
-        NoclipBtn.Text = "Noclip + Платформа: ON"
-        NoclipBtn.BackgroundColor3 = Color3.fromRGB(0, 150, 0)
+SpinBtn.MouseButton1Click:Connect(function()
+    SpinActive = not SpinActive
+    if SpinActive then
+        SpinBtn.Text = "Гіпер-Крутилка: ON"
+        SpinBtn.BackgroundColor3 = Color3.fromRGB(0, 150, 0)
     else
-        NoclipBtn.Text = "Noclip + Платформа: OFF"
-        NoclipBtn.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+        SpinBtn.Text = "Гіпер-Крутилка: OFF"
+        SpinBtn.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
     end
 end)
 
-local SpeedLabel = Instance.new("TextLabel")
-SpeedLabel.Size = UDim2.new(0.9, 0, 0, 30)
-SpeedLabel.Position = UDim2.new(0.05, 0, 0.52, 0)
-SpeedLabel.BackgroundTransparency = 1
-SpeedLabel.Text = "Швидкість бігу: " .. Speed
-SpeedLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-SpeedLabel.TextSize = 14
-SpeedLabel.Font = Enum.Font.SourceSans
-SpeedLabel.Parent = MainFrame
-
-local SpeedUp = Instance.new("TextButton")
-SpeedUp.Size = UDim2.new(0.42, 0, 0, 30)
-SpeedUp.Position = UDim2.new(0.53, 0, 0.72, 0)
-SpeedUp.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-SpeedUp.Text = "+50"
-SpeedUp.TextColor3 = Color3.fromRGB(255, 255, 255)
-SpeedUp.Parent = MainFrame
-
-SpeedUp.MouseButton1Click:Connect(function()
-    Speed = math.min(Speed + 50, 500)
-    SpeedLabel.Text = "Швидкість бігу: " .. Speed
-    UpdateWalkSpeed()
-end)
-
-local SpeedDown = Instance.new("TextButton")
-SpeedDown.Size = UDim2.new(0.42, 0, 0, 30)
-SpeedDown.Position = UDim2.new(0.05, 0, 0.72, 0)
-SpeedDown.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-SpeedDown.Text = "-50"
-SpeedDown.TextColor3 = Color3.fromRGB(255, 255, 255)
-SpeedDown.Parent = MainFrame
-
-SpeedDown.MouseButton1Click:Connect(function()
-    Speed = math.max(Speed - 50, 16)
-    SpeedLabel.Text = "Швидкість бігу: " .. Speed
-    UpdateWalkSpeed()
-end)
-
+MakeCube()
 UpdateWalkSpeed()
