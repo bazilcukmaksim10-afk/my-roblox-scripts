@@ -330,8 +330,13 @@ CreateButton(TabFun, "Стати Маленьким Кубом", function()
         Cube.Color = Color3.fromRGB(85, 255, 85)
         Cube.CanCollide = false
         Cube.Parent = RootPart
+        
         local Weld = Instance.new("Weld")
-        Weld.Part0 = RootPart Weld.Part1 = Cube Weld.Parent = Cube
+        Weld.Part0 = RootPart
+        Weld.Part1 = Cube
+        -- math.rad(180) повертає куб верх ногами по осі X
+        Weld.C0 = CFrame.new(0, 0, 0) * CFrame.Angles(math.rad(180), 0, 0)
+        Weld.Parent = Cube
     end
 end)
 
