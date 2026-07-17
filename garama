@@ -8,10 +8,11 @@ local RootPart = Character:WaitForChild("HumanoidRootPart")
 
 local SpinActive = false
 local Speed = 150
+local FixedY = 0
 
 -- Створення платформи під гравцем
 local Platform = Instance.new("Part")
-Platform.Size = Vector3.new(4, 1, 4)
+Platform.Size = Vector3.new(6, 1, 6)
 Platform.Anchored = true
 Platform.Transparency = 1
 Platform.CanCollide = false
@@ -20,7 +21,7 @@ Platform.Parent = workspace
 -- Керування крутилкою
 local Spin = Instance.new("BodyAngularVelocity")
 Spin.MaxTorque = Vector3.new(0, math.huge, 0)
-Spin.AngularVelocity = Vector3.new(0, 10000000, 0) -- Гіпер-швидкість крутіння
+Spin.AngularVelocity = Vector3.new(0, 5000, 0) -- Стабільне шалене крутіння без багів фізики
 
 -- Функція перетворення на МАЛЕНЬКИЙ квадрат
 local function MakeSmallCube()
@@ -33,20 +34,22 @@ local function MakeSmallCube()
             end
         end
         
-        if not RootPart:FindFirstChild("VisualCube") then
-            local Cube = Instance.new("Part")
-            Cube.Name = "VisualCube"
-            Cube.Size = Vector3.new(1.2, 1.2, 1.2) -- Маленький розмір кубика
-            Cube.Color = Color3.fromRGB(85, 255, 85) -- Яскравий зелений колір
-            Cube.CanCollide = false
-            Cube.Parent = RootPart
-            
-            local Weld = Instance.new("Weld")
-            Weld.Part0 = RootPart
-            Weld.Part1 = Cube
-            Weld.C0 = CFrame.new(0, 0, 0)
-            Weld.Parent = Cube
-        end
+        local ExistingCube = RootPart:FindFirstChild("VisualCube")
+        if ExistingCube then ExistingCube:Destroy() end
+
+        local Cube = Instance.new("Part")
+        Cube.Name = "VisualCube"
+        Cube.Size = Vector3.new(1.5, 1.5, 1.5) -- Маленький кубик
+        Cube.Color = Color3.fromRGB(85, 255, 85) -- Яскравий зелений
+        Cube.CanCollide = false
+        Cube.Transparency = 0 -- Стовідсотково видимий!
+        Cube.Parent = RootPart
+        
+        local Weld = Instance.new("Weld")
+        Weld.Part0 = RootPart
+        Weld.Part1 = Cube
+        Weld.C0 = CFrame.new(0, 0, 0)
+        Weld.Parent = Cube
     end
 end
 
@@ -63,22 +66,28 @@ Player.CharacterAdded:Connect(function(char)
     UpdateWalkSpeed()
 end)
 
--- Основний цикл: Ноукліп, Платформа та Обертання
+-- Основний цикл: Ноукліп, Платформа та Обертання без зльоту
 game:GetService("RunService").Stepped:Connect(function()
     if Character and Humanoid and RootPart then
         if SpinActive then
+            -- Вимикаємо колізію
             for _, part in pairs(Character:GetDescendants()) do
                 if part:IsA("BasePart") then
                     part.CanCollide = false
                 end
             end
+            
+            -- Тримаємо Y-висоту, щоб не летіти вгору
+            RootPart.Velocity = Vector3.new(RootPart.Velocity.X, 0, RootPart.Velocity.Z)
+            RootPart.CFrame = CFrame.new(RootPart.Position.X, FixedY, RootPart.Position.Z) * CFrame.Angles(0, math.rad(RootPart.Orientation.Y), 0)
+
             Platform.CanCollide = true
-            Platform.CFrame = RootPart.CFrame * CFrame.new(0, -2.1, 0)
-            Spin.Parent = RootPart -- Вмикаємо крутилку
+            Platform.CFrame = CFrame.new(RootPart.Position.X, FixedY - 2.2, RootPart.Position.Z)
+            Spin.Parent = RootPart
         else
             Platform.CanCollide = false
             Platform.CFrame = CFrame.new(0, 9999, 0)
-            Spin.Parent = nil -- Вимикаємо крутилку
+            Spin.Parent = nil
         end
     end
 end)
@@ -101,7 +110,7 @@ MainFrame.Parent = ScreenGui
 local Title = Instance.new("TextLabel")
 Title.Size = UDim2.new(1, 0, 0, 40)
 Title.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-Title.Text = "Coco's Spin Cube"
+Title.Text = "Coco's Fix Spin"
 Title.TextColor3 = Color3.fromRGB(255, 255, 255)
 Title.TextSize = 16
 Title.Font = Enum.Font.SourceSansBold
@@ -120,6 +129,7 @@ SpinBtn.Parent = MainFrame
 SpinBtn.MouseButton1Click:Connect(function()
     SpinActive = not SpinActive
     if SpinActive then
+        if RootPart then FixedY = RootPart.Position.Y end -- Запам'ятовуємо поточну висоту
         SpinBtn.Text = "Гіпер-Крутилка: ON"
         SpinBtn.BackgroundColor3 = Color3.fromRGB(0, 150, 0)
     else
